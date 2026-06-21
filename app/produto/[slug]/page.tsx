@@ -12,13 +12,13 @@ import { mainMenu, topBarItems, whatsapp } from "@/data/menu";
 import { getProductBySlug } from "@/lib/api";
 
 interface PageProps {
-  params: { id: string };
+  params: { slug: string };
 }
 
 export const dynamic = "force-dynamic";
 
 export default async function ProductPage({ params }: PageProps) {
-  const { data: product, error } = await getProductBySlug(params.id);
+  const { data: product, error } = await getProductBySlug(params.slug);
 
   if (!product && !error) {
     notFound();

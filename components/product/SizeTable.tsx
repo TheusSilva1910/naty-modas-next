@@ -1,4 +1,4 @@
-import { sizeChart } from "@/data/catalog";
+import { sizeChart } from "@/data/size-chart";
 
 /** Tabela de medidas reaproveitada na PDP. */
 export function SizeTable() {

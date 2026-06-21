@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
 import { TopBar } from "./TopBar";
 import type { MenuItem, TopBarItem } from "@/types";
@@ -23,8 +24,25 @@ const userActions = [
  *  · Desktop (md+): logo centralizada, busca à esquerda, ações à direita, menu abaixo.
  *  · Mobile: hambúrguer, logo central compacta, busca + sacola.
  */
+function menuItemClass(m: MenuItem, pathname: string, mobile = false): string {
+  const isActive = m.href === "/" ? pathname === "/" : pathname.startsWith(m.href);
+  const base = mobile ? "" : "pb-1.5 transition-colors";
+
+  if (isActive) {
+    return `${base} text-naty-rose-deep ${mobile ? "" : "border-b-2 border-naty-rose-deep"}`.trim();
+  }
+  if (m.highlight === "primary") {
+    return `${base} text-naty-rose-deep hover:opacity-80`.trim();
+  }
+  if (m.highlight === "gold") {
+    return `${base} text-naty-gold hover:text-naty-rose-deep`.trim();
+  }
+  return `${base} hover:text-naty-rose-deep`.trim();
+}
+
 export function Header({ menu, topBarItems, phone, cartCount = 0 }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="bg-white">
@@ -92,13 +110,7 @@ export function Header({ menu, topBarItems, phone, cartCount = 0 }: HeaderProps)
               <Link
                 key={m.label}
                 href={m.href}
-                className={
-                  m.highlight === "primary"
-                    ? "text-naty-rose-deep border-b border-naty-gold pb-1.5"
-                    : m.highlight === "gold"
-                    ? "text-naty-gold hover:text-naty-rose-deep transition-colors"
-                    : "hover:text-naty-rose-deep transition-colors"
-                }
+                className={menuItemClass(m, pathname)}
               >
                 {m.label}
               </Link>
@@ -162,13 +174,7 @@ export function Header({ menu, topBarItems, phone, cartCount = 0 }: HeaderProps)
                 <Link
                   key={m.label}
                   href={m.href}
-                  className={
-                    m.highlight === "primary"
-                      ? "text-naty-rose-deep"
-                      : m.highlight === "gold"
-                      ? "text-naty-gold"
-                      : ""
-                  }
+                  className={menuItemClass(m, pathname, true)}
                 >
                   {m.label}
                 </Link>
