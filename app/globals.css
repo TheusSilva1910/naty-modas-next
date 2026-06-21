@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply text-naty-text;
+  }
+  body {
+    @apply font-sans bg-white text-naty-text antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display font-medium;
+  }
+}
+
+@layer components {
+  /* Linha decorativa dourada (hairline) */
+  .naty-hairline {
+    @apply h-px w-full bg-naty-hairline;
+  }
+
+  /* Botão sólido principal */
+  .btn-primary {
+    @apply inline-flex items-center justify-center bg-naty-rose-deep text-white
+           px-7 py-4 text-[11px] tracking-[0.32em] uppercase
+           transition-colors hover:bg-naty-rose;
+  }
+
+  /* Botão outline com borda dourada */
+  .btn-outline {
+    @apply inline-flex items-center justify-center bg-transparent text-naty-text
+           border border-naty-gold px-7 py-4 text-[11px] tracking-[0.32em] uppercase
+           transition-colors hover:bg-naty-gold hover:text-white;
+  }
+
+  /* Botão WhatsApp */
+  .btn-whats {
+    @apply inline-flex items-center justify-center gap-2 bg-naty-whats text-white
+           px-7 py-4 text-[11px] tracking-[0.32em] uppercase
+           transition-opacity hover:opacity-90;
+  }
+
+  /* Eyebrow (texto introdutório dourado) */
+  .eyebrow {
+    @apply text-[11px] tracking-[0.36em] text-naty-gold uppercase;
+  }
+
+  /* Divisor decorativo "—— MODAS ——" */
+  .naty-divider {
+    @apply flex items-center justify-center gap-2;
+  }
+  .naty-divider::before,
+  .naty-divider::after {
+    content: "";
+    @apply h-px w-7 bg-naty-gold;
+  }
+}
