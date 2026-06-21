@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Breadcrumb } from "@/components/Breadcrumb";
@@ -16,68 +17,79 @@ import type { Category, CategoryFilter, Product, ProductColor } from "@/types";
 
 interface PageProps {
   params: { categoria: string };
+  searchParams?: {
+    page?: string;
+    sort?: string;
+    size?: string;
+    color?: string;
+    minPrice?: string;
+    maxPrice?: string;
+  };
 }
 
 export const dynamic = "force-dynamic";
 
 function getSizeOptions(products: Product[]) {
-  return Array.from(new Set(products.flatMap((product) => product.sizes ?? [])));
+  return Array.from(new Set(products.flatMap((p) => p.sizes ?? [])));
 }
 
 function getColorOptions(products: Product[]): ProductColor[] {
-  return Array.from(
-    new Set(products.flatMap((product) => product.colors ?? []))
-  ).map((color) => ({
-    name: color,
-    hex: getColorHex(color),
-  }));
+  return Array.from(new Set(products.flatMap((p) => p.colors ?? []))).map(
+    (color) => ({ name: color, hex: getColorHex(color) })
+  );
 }
 
 function getPriceRange(products: Product[]) {
-  if (products.length === 0) {
-    return undefined;
-  }
-
-  const prices = products.map((product) => product.price);
-
-  return {
-    min: Math.floor(Math.min(...prices)),
-    max: Math.ceil(Math.max(...prices)),
-  };
+  if (products.length === 0) return undefined;
+  const prices = products.map((p) => p.price);
+  return { min: Math.floor(Math.min(...prices)), max: Math.ceil(Math.max(...prices)) };
 }
 
 function getCategoryFilters(categories: Category[]): CategoryFilter[] {
-  return categories.map((category) => ({
-    id: category.id,
-    label: category.name,
-    count: category.count,
-  }));
+  return categories.map((c) => ({ id: c.id, label: c.name, count: c.count }));
 }
 
-export default async function CategoryPage({ params }: PageProps) {
+export default async function CategoryPage({ params, searchParams = {} }: PageProps) {
   const slug = params.categoria;
+  const page = searchParams.page ?? "1";
+
+  const query = new URLSearchParams({ category: slug });
+  if (searchParams.sort)     query.set("sort",     searchParams.sort);
+  if (searchParams.size)     query.set("size",     searchParams.size);
+  if (searchParams.color)    query.set("color",    searchParams.color);
+  if (searchParams.minPrice) query.set("minPrice", searchParams.minPrice);
+  if (searchParams.maxPrice) query.set("maxPrice", searchParams.maxPrice);
+  query.set("page", page);
+
   const [categoriesResult, productsResult] = await Promise.all([
     getCategories(),
-    getProducts(`?category=${slug}`),
+    getProducts(`?${query.toString()}`),
   ]);
 
   const category = categoriesResult.data.find((item) => item.id === slug);
-
-  if (!category && !categoriesResult.error) {
-    notFound();
-  }
+  if (!category && !categoriesResult.error) notFound();
 
   const products = productsResult.data;
+  const pagination = productsResult.pagination;
   const errors = [categoriesResult.error, productsResult.error].filter(Boolean);
+
+  // Chips de filtros ativos
+  const activeChips = [
+    ...(searchParams.size  ? [{ type: "size"  as const, label: searchParams.size }]  : []),
+    ...(searchParams.color ? [{ type: "color" as const, label: searchParams.color }] : []),
+  ];
+
+  // searchParams limpos (sem page) para passar ao Pagination
+  const safeParams: Record<string, string> = {};
+  if (searchParams.sort)     safeParams.sort     = searchParams.sort;
+  if (searchParams.size)     safeParams.size     = searchParams.size;
+  if (searchParams.color)    safeParams.color    = searchParams.color;
+  if (searchParams.minPrice) safeParams.minPrice = searchParams.minPrice;
+  if (searchParams.maxPrice) safeParams.maxPrice = searchParams.maxPrice;
 
   return (
     <>
-      <Header
-        menu={mainMenu}
-        topBarItems={topBarItems}
-        phone={whatsapp.display}
-        cartCount={2}
-      />
+      <Header menu={mainMenu} topBarItems={topBarItems} phone={whatsapp.display} />
 
       <main className="bg-white">
         <div className="bg-naty-blushSoft py-8 md:py-10 px-4 md:px-14">
@@ -95,22 +107,26 @@ export default async function CategoryPage({ params }: PageProps) {
               <div className="flex items-center gap-2.5 mt-2.5">
                 <span className="h-px w-6 bg-naty-gold" />
                 <span className="text-[12px] text-naty-muted">
-                  {products.length} peças
+                  {pagination?.total ?? products.length} peças
                 </span>
               </div>
             </div>
-            <SortDropdown />
+            <Suspense>
+              <SortDropdown />
+            </Suspense>
           </div>
         </div>
 
         <div className="grid lg:grid-cols-[260px_1fr] gap-8 lg:gap-12 px-4 md:px-14 py-10 md:py-12">
           <div className="hidden lg:block">
-            <FiltersSidebar
-              sizeOptions={getSizeOptions(products)}
-              colorOptions={getColorOptions(products)}
-              categoryFilters={getCategoryFilters(categoriesResult.data)}
-              priceRange={getPriceRange(products)}
-            />
+            <Suspense>
+              <FiltersSidebar
+                sizeOptions={getSizeOptions(products)}
+                colorOptions={getColorOptions(products)}
+                categoryFilters={getCategoryFilters(categoriesResult.data)}
+                priceRange={getPriceRange(products)}
+              />
+            </Suspense>
           </div>
 
           <div className="grid grid-cols-2 lg:hidden border-y border-naty-line -mx-4 mb-4 text-[11px] tracking-[0.22em] uppercase">
@@ -119,7 +135,7 @@ export default async function CategoryPage({ params }: PageProps) {
           </div>
 
           <div>
-            <FilterChips tags={[]} />
+            <FilterChips tags={activeChips} />
 
             {errors.length > 0 && (
               <div className="mb-6">
@@ -144,7 +160,12 @@ export default async function CategoryPage({ params }: PageProps) {
             )}
 
             <div className="mt-12">
-              <Pagination current={1} total={1} />
+              <Pagination
+                current={parseInt(page, 10)}
+                total={pagination?.pages ?? 1}
+                searchParams={safeParams}
+                basePath={`/${slug}`}
+              />
             </div>
           </div>
         </div>

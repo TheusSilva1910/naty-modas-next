@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatBRL } from "@/lib/format";
+import { useCart } from "@/contexts/CartContext";
 import type { ProductFull } from "@/types";
 
 interface ProductInfoProps {
@@ -13,6 +15,8 @@ interface ProductInfoProps {
  * Toda a interação (cor/tamanho/quantidade) é controlada localmente.
  */
 export function ProductInfo({ product }: ProductInfoProps) {
+  const router = useRouter();
+  const { addItem } = useCart();
   const [selectedColor, setSelectedColor] = useState(
     product.availableColors[0] ?? null
   );
@@ -22,6 +26,23 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const [qty, setQty] = useState(1);
 
   const pixPrice = product.price * 0.9;
+
+  function handleAddToCart() {
+    if (!selectedColor || !selectedSize) return;
+    addItem({
+      productId: product.id,
+      name: product.name,
+      category: product.category,
+      color: selectedColor.name,
+      size: selectedSize,
+      price: product.price,
+      installments: product.installments ?? { count: 6, value: product.price / 6 },
+      qty,
+      imageUrl: product.gallery[0]?.imageUrl,
+      imageVariant: product.gallery[0]?.variant,
+    });
+    router.push("/sacola");
+  }
 
   return (
     <div className="md:pt-2 md:pl-4">
@@ -147,7 +168,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
             +
           </button>
         </div>
-        <button type="button" className="btn-primary flex-1">
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={!selectedColor || !selectedSize}
+          className="btn-primary flex-1 disabled:opacity-50"
+        >
           Comprar agora
         </button>
       </div>

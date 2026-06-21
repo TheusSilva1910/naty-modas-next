@@ -59,7 +59,6 @@ export default async function HomePage() {
         menu={mainMenu}
         topBarItems={topBarItems}
         phone={whatsapp.display}
-        cartCount={2}
       />
 
       <main>

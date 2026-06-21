@@ -1,5 +1,6 @@
-import { freeShippingThreshold } from "@/data/cart";
 import { formatBRL } from "@/lib/format";
+
+const FREE_SHIPPING_THRESHOLD = 299;
 
 interface FreeShippingBarProps {
   subtotal: number;
@@ -7,8 +8,8 @@ interface FreeShippingBarProps {
 
 /** Barra de progresso até o frete grátis. */
 export function FreeShippingBar({ subtotal }: FreeShippingBarProps) {
-  const missing = Math.max(0, freeShippingThreshold - subtotal);
-  const progress = Math.min(100, (subtotal / freeShippingThreshold) * 100);
+  const missing = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
+  const progress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
   const reached = missing === 0;
 
   return (

@@ -1,15 +1,19 @@
-import { checkoutSteps } from "@/data/cart";
+const steps = [
+  { id: 1, label: "Sacola" },
+  { id: 2, label: "Entrega" },
+  { id: 3, label: "Pagamento" },
+  { id: 4, label: "Confirmação" },
+];
 
 interface CheckoutStepsProps {
   current: number;
 }
 
-/** Indicador de etapas — desktop apenas (mobile esconde para economizar espaço). */
 export function CheckoutSteps({ current }: CheckoutStepsProps) {
   return (
     <div className="bg-naty-blush py-6 px-4 md:px-14 hidden md:block">
       <div className="flex justify-center items-center gap-6 text-[11px] tracking-[0.22em] uppercase">
-        {checkoutSteps.map((s, i) => {
+        {steps.map((s, i) => {
           const isCurrent = s.id === current;
           const isPast = s.id < current;
           return (
@@ -36,11 +40,9 @@ export function CheckoutSteps({ current }: CheckoutStepsProps) {
                 </span>
                 {s.label}
               </span>
-              {i < checkoutSteps.length - 1 && (
+              {i < steps.length - 1 && (
                 <span
-                  className={`h-px w-12 ${
-                    isPast ? "bg-naty-gold" : "bg-naty-line"
-                  }`}
+                  className={`h-px w-12 ${isPast ? "bg-naty-gold" : "bg-naty-line"}`}
                 />
               )}
             </div>

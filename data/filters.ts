@@ -22,10 +22,10 @@ export const categoryFilters: CategoryFilter[] = [
 ];
 
 export const sortOptions = [
-  "Mais relevantes",
-  "Menor preço",
-  "Maior preço",
-  "Novidades",
+  { value: "",           label: "Mais relevantes" },
+  { value: "price_asc",  label: "Menor preço" },
+  { value: "price_desc", label: "Maior preço" },
+  { value: "newest",     label: "Novidades" },
 ];
 
 export const priceRange = { min: 120, max: 480 };

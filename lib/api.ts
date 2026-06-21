@@ -8,10 +8,18 @@ import type {
 } from "@/types";
 import { getColorHex } from "@/lib/product-colors";
 
+type ApiPagination = {
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+};
+
 type ApiResponse<T> = {
   success: boolean;
   data?: T;
   error?: string;
+  pagination?: ApiPagination;
 };
 
 type ApiCategory = {
@@ -114,6 +122,7 @@ async function fetchApi<T>(path: string) {
 
   return {
     data: payload.data ?? null,
+    pagination: payload.pagination,
     error: null,
   };
 }
@@ -224,6 +233,7 @@ export async function getProducts(query = "") {
   const result = await fetchApi<ApiProduct[]>(`/api/products${query}`);
   return {
     data: result.data?.map(toProduct) ?? [],
+    pagination: result.pagination,
     error: result.error,
   };
 }

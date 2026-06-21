@@ -1,20 +1,84 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type Mode = "login" | "signup";
 
-/**
- * Formulário de login / cadastro com alternância entre os dois modos.
- * Validação mínima — em produção, integrar com NextAuth ou auth provider.
- */
 export function AuthForm() {
+  const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function onSubmit(e: FormEvent) {
+  function switchMode(next: Mode) {
+    setMode(next);
+    setError("");
+  }
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO: integrar com backend
+    setError("");
+    setLoading(true);
+
+    const form = new FormData(e.currentTarget);
+    const email = form.get("email") as string;
+    const password = form.get("password") as string;
+
+    try {
+      if (mode === "login") {
+        const result = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+        if (result?.error) {
+          setError("E-mail ou senha incorretos.");
+        } else {
+          router.push("/");
+          router.refresh();
+        }
+      } else {
+        const name = form.get("name") as string;
+        const confirm = form.get("confirmPassword") as string;
+
+        if (password !== confirm) {
+          setError("Senhas não coincidem.");
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        });
+
+        const data = await res.json();
+        if (!data.success) {
+          setError(data.error ?? "Erro ao criar conta.");
+          setLoading(false);
+          return;
+        }
+
+        const result = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (!result?.error) {
+          router.push("/");
+          router.refresh();
+        }
+      }
+    } catch {
+      setError("Erro inesperado. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -25,7 +89,7 @@ export function AuthForm() {
           <button
             key={m}
             type="button"
-            onClick={() => setMode(m)}
+            onClick={() => switchMode(m)}
             className={`flex-1 pb-4 text-[12px] tracking-[0.28em] uppercase transition-colors ${
               mode === m
                 ? "text-naty-rose-deep border-b-2 border-naty-rose-deep -mb-px"
@@ -46,18 +110,20 @@ export function AuthForm() {
         </h1>
       </header>
 
+      {error && (
+        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-[12px]">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={onSubmit} className="flex flex-col gap-5">
         {mode === "signup" && (
-          <Field label="Nome completo" type="text" placeholder="Como podemos te chamar?" />
+          <Field name="name" label="Nome completo" type="text" placeholder="Como podemos te chamar?" />
         )}
-        <Field label="E-mail" type="email" placeholder="voce@exemplo.com" />
-        <Field
-          label="Senha"
-          type="password"
-          placeholder="Mínimo 8 caracteres"
-        />
+        <Field name="email" label="E-mail" type="email" placeholder="voce@exemplo.com" />
+        <Field name="password" label="Senha" type="password" placeholder="Mínimo 8 caracteres" />
         {mode === "signup" && (
-          <Field label="Confirmar senha" type="password" placeholder="Repita a senha" />
+          <Field name="confirmPassword" label="Confirmar senha" type="password" placeholder="Repita a senha" />
         )}
 
         {mode === "login" && (
@@ -75,58 +141,48 @@ export function AuthForm() {
         {mode === "signup" && (
           <label className="flex items-start gap-2.5 text-[11px] text-naty-muted leading-relaxed">
             <input type="checkbox" defaultChecked className="accent-naty-rose-deep mt-0.5" />
-            <span>
-              Quero receber novidades e descontos exclusivos por e-mail.
-            </span>
+            <span>Quero receber novidades e descontos exclusivos por e-mail.</span>
           </label>
         )}
 
-        <button type="submit" className="btn-primary w-full mt-2">
-          {mode === "login" ? "Entrar" : "Criar minha conta"}
-        </button>
-
-        <div className="text-center text-[11px] text-naty-muted tracking-[0.16em] uppercase my-1">
-          ou
-        </div>
-
         <button
-          type="button"
-          className="border border-naty-line py-3.5 text-[12px] tracking-[0.18em] uppercase hover:border-naty-gold transition-colors"
+          type="submit"
+          disabled={loading}
+          className="btn-primary w-full mt-2 disabled:opacity-60"
         >
-          Continuar com Google
+          {loading
+            ? "Aguarde..."
+            : mode === "login"
+            ? "Entrar"
+            : "Criar minha conta"}
         </button>
       </form>
 
       <p className="text-center text-[11px] text-naty-muted mt-8">
         Ao continuar, você concorda com nossos{" "}
-        <Link href="/termos" className="text-naty-rose-deep">
-          Termos
-        </Link>{" "}
-        e{" "}
-        <Link href="/privacidade" className="text-naty-rose-deep">
-          Política de Privacidade
-        </Link>
-        .
+        <Link href="/termos" className="text-naty-rose-deep">Termos</Link> e{" "}
+        <Link href="/privacidade" className="text-naty-rose-deep">Política de Privacidade</Link>.
       </p>
     </div>
   );
 }
 
 function Field({
+  name,
   label,
   type,
   placeholder,
 }: {
+  name: string;
   label: string;
   type: string;
   placeholder?: string;
 }) {
   return (
     <label className="block">
-      <span className="text-[11px] tracking-[0.22em] text-naty-text uppercase">
-        {label}
-      </span>
+      <span className="text-[11px] tracking-[0.22em] text-naty-text uppercase">{label}</span>
       <input
+        name={name}
         type={type}
         required
         placeholder={placeholder}

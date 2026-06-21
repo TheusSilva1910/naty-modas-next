@@ -1,37 +1,62 @@
+import Link from "next/link";
+
 interface PaginationProps {
   current: number;
   total: number;
+  /** Parâmetros atuais da URL para preservar filtros/sort ao paginar */
+  searchParams?: Record<string, string>;
+  basePath?: string;
 }
 
-/**
- * Paginação simples com elipse no meio quando passa de 5 páginas.
- * Apenas visual — em produção, ligar a query string ou search params.
- */
-export function Pagination({ current, total }: PaginationProps) {
+function buildUrl(
+  page: number,
+  basePath = "",
+  params: Record<string, string> = {}
+) {
+  const q = new URLSearchParams({ ...params, page: String(page) });
+  return `${basePath}?${q.toString()}`;
+}
+
+export function Pagination({
+  current,
+  total,
+  searchParams = {},
+  basePath = "",
+}: PaginationProps) {
+  if (total <= 1) return null;
+
   const pages = buildPages(current, total);
+  const base = { ...searchParams };
+  delete base.page;
 
   return (
     <nav
       aria-label="Paginação"
       className="flex justify-center items-center gap-3.5 text-[12px] tracking-[0.16em] uppercase"
     >
-      <button
-        type="button"
-        disabled={current === 1}
-        className="disabled:text-naty-line text-naty-muted hover:text-naty-rose-deep"
-      >
-        ← Anterior
-      </button>
+      {current > 1 ? (
+        <Link
+          href={buildUrl(current - 1, basePath, base)}
+          className="text-naty-muted hover:text-naty-rose-deep"
+        >
+          ← Anterior
+        </Link>
+      ) : (
+        <span className="text-naty-line">← Anterior</span>
+      )}
 
       {pages.map((p, i) =>
         p === "…" ? (
-          <span key={`gap-${i}`} className="w-[34px] h-[34px] inline-flex items-center justify-center">
+          <span
+            key={`gap-${i}`}
+            className="w-[34px] h-[34px] inline-flex items-center justify-center"
+          >
             …
           </span>
         ) : (
-          <button
+          <Link
             key={p}
-            type="button"
+            href={buildUrl(p, basePath, base)}
             aria-current={p === current ? "page" : undefined}
             className={`w-[34px] h-[34px] inline-flex items-center justify-center transition-colors ${
               p === current
@@ -40,17 +65,20 @@ export function Pagination({ current, total }: PaginationProps) {
             }`}
           >
             {p}
-          </button>
+          </Link>
         )
       )}
 
-      <button
-        type="button"
-        disabled={current === total}
-        className="text-naty-rose-deep hover:text-naty-rose disabled:text-naty-line"
-      >
-        Próximo →
-      </button>
+      {current < total ? (
+        <Link
+          href={buildUrl(current + 1, basePath, base)}
+          className="text-naty-rose-deep hover:text-naty-rose"
+        >
+          Próximo →
+        </Link>
+      ) : (
+        <span className="text-naty-line">Próximo →</span>
+      )}
     </nav>
   );
 }

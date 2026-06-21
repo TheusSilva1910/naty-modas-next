@@ -146,6 +146,7 @@ export interface CartItem {
   installments: { count: number; value: number };
   qty: number;
   imageVariant?: "rose" | "cream" | "dark";
+  imageUrl?: string;
 }
 
 /* ──────── Sobre ──────── */

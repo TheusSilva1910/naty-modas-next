@@ -1,30 +1,22 @@
 "use client";
 
-import { useState } from "react";
 import { Placeholder } from "../Placeholder";
 import { formatBRL } from "@/lib/format";
 import type { CartItem as CartItemType } from "@/types";
 
 interface CartItemProps {
   item: CartItemType;
-  onRemove?: (productId: string) => void;
-  onQtyChange?: (productId: string, qty: number) => void;
+  onRemove?: (productId: string, color: string, size: string) => void;
+  onQtyChange?: (productId: string, color: string, size: string, qty: number) => void;
 }
 
-/** Item individual da sacola — desktop e mobile compartilham. */
 export function CartItem({ item, onRemove, onQtyChange }: CartItemProps) {
-  const [qty, setQty] = useState(item.qty);
-
-  function updateQty(next: number) {
-    const v = Math.max(1, next);
-    setQty(v);
-    onQtyChange?.(item.productId, v);
-  }
-
   return (
     <div className="grid grid-cols-[100px_1fr_auto] md:grid-cols-[140px_1fr_auto] gap-4 md:gap-6 py-6 border-b border-naty-line">
       <Placeholder
         variant={item.imageVariant}
+        imageUrl={item.imageUrl}
+        imageAlt={item.name}
         className="aspect-[3/4]"
       />
 
@@ -47,18 +39,22 @@ export function CartItem({ item, onRemove, onQtyChange }: CartItemProps) {
           <div className="flex items-center border border-naty-line">
             <button
               type="button"
-              onClick={() => updateQty(qty - 1)}
+              onClick={() =>
+                onQtyChange?.(item.productId, item.color, item.size, item.qty - 1)
+              }
               className="px-3 py-1.5"
               aria-label="Diminuir"
             >
               −
             </button>
             <span className="px-3 py-1.5 min-w-7 text-center text-[13px]">
-              {qty}
+              {item.qty}
             </span>
             <button
               type="button"
-              onClick={() => updateQty(qty + 1)}
+              onClick={() =>
+                onQtyChange?.(item.productId, item.color, item.size, item.qty + 1)
+              }
               className="px-3 py-1.5"
               aria-label="Aumentar"
             >
@@ -67,23 +63,17 @@ export function CartItem({ item, onRemove, onQtyChange }: CartItemProps) {
           </div>
           <button
             type="button"
-            onClick={() => onRemove?.(item.productId)}
+            onClick={() => onRemove?.(item.productId, item.color, item.size)}
             className="text-[12px] text-naty-muted underline underline-offset-4"
           >
             remover
-          </button>
-          <button
-            type="button"
-            className="hidden md:inline text-[12px] text-naty-gold underline underline-offset-4"
-          >
-            salvar para depois
           </button>
         </div>
       </div>
 
       <div className="text-right">
         <div className="font-display text-[18px] md:text-[22px] text-naty-rose-deep font-medium">
-          {formatBRL(item.price * qty)}
+          {formatBRL(item.price * item.qty)}
         </div>
         <div className="text-[11px] text-naty-muted mt-1">
           {item.installments.count}x {formatBRL(item.installments.value)}

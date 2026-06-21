@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import type { CategoryFilter, ProductColor } from "@/types";
 
 interface FiltersSidebarProps {
   sizeOptions?: string[];
   colorOptions?: ProductColor[];
   categoryFilters?: CategoryFilter[];
-  priceRange?: {
-    min: number;
-    max: number;
-  };
+  priceRange?: { min: number; max: number };
 }
 
 export function FiltersSidebar({
@@ -19,11 +17,19 @@ export function FiltersSidebar({
   categoryFilters = [],
   priceRange,
 }: FiltersSidebarProps) {
-  const [selectedSize, setSelectedSize] = useState<string>(sizeOptions[0] ?? "");
-  const [selectedColor, setSelectedColor] = useState<string>(
-    colorOptions[0]?.name ?? ""
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [selectedSize, setSelectedSize] = useState(
+    searchParams.get("size") ?? ""
   );
-  const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
+  const [selectedColor, setSelectedColor] = useState(
+    searchParams.get("color") ?? ""
+  );
+  const [activeTags, setActiveTags] = useState<Set<string>>(
+    new Set(searchParams.getAll("tag"))
+  );
 
   function toggleTag(id: string) {
     setActiveTags((prev) => {
@@ -33,10 +39,52 @@ export function FiltersSidebar({
     });
   }
 
+  function applyFilters() {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (selectedSize) params.set("size", selectedSize);
+    else params.delete("size");
+
+    if (selectedColor) params.set("color", selectedColor);
+    else params.delete("color");
+
+    params.delete("tag");
+    activeTags.forEach((t) => params.append("tag", t));
+
+    params.delete("page");
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
+  function clearFilters() {
+    setSelectedSize("");
+    setSelectedColor("");
+    setActiveTags(new Set());
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("size");
+    params.delete("color");
+    params.delete("tag");
+    params.delete("page");
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
+  const hasActive =
+    selectedSize || selectedColor || activeTags.size > 0;
+
   return (
     <aside aria-label="Filtros">
-      <div className="text-[11px] tracking-[0.24em] text-naty-gold mb-6 uppercase">
-        Filtros
+      <div className="flex items-center justify-between mb-6">
+        <div className="text-[11px] tracking-[0.24em] text-naty-gold uppercase">
+          Filtros
+        </div>
+        {hasActive && (
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="text-[11px] text-naty-muted underline underline-offset-4"
+          >
+            limpar
+          </button>
+        )}
       </div>
 
       {sizeOptions.length > 0 && (
@@ -46,7 +94,9 @@ export function FiltersSidebar({
               <button
                 key={size}
                 type="button"
-                onClick={() => setSelectedSize(size)}
+                onClick={() =>
+                  setSelectedSize(selectedSize === size ? "" : size)
+                }
                 className={`text-[11px] py-2.5 border transition-colors ${
                   selectedSize === size
                     ? "border-naty-rose-deep text-naty-rose-deep"
@@ -70,7 +120,9 @@ export function FiltersSidebar({
                   key={color.name}
                   type="button"
                   title={color.name}
-                  onClick={() => setSelectedColor(color.name)}
+                  onClick={() =>
+                    setSelectedColor(selectedColor === color.name ? "" : color.name)
+                  }
                   style={{ background: color.hex }}
                   className={`w-[26px] h-[26px] rounded-full transition-shadow ${
                     active
@@ -136,6 +188,7 @@ export function FiltersSidebar({
 
       <button
         type="button"
+        onClick={applyFilters}
         className="w-full bg-naty-rose-deep text-white py-3.5 text-[11px] tracking-[0.28em] uppercase hover:bg-naty-rose transition-colors"
       >
         Aplicar filtros
@@ -153,9 +206,7 @@ function Group({
 }) {
   return (
     <div className="mb-7">
-      <div className="font-display text-[15px] mb-3.5 text-naty-text">
-        {title}
-      </div>
+      <div className="font-display text-[15px] mb-3.5 text-naty-text">{title}</div>
       {children}
     </div>
   );

@@ -5,13 +5,13 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
 import { TopBar } from "./TopBar";
+import { useCart } from "@/contexts/CartContext";
 import type { MenuItem, TopBarItem } from "@/types";
 
 interface HeaderProps {
   menu: MenuItem[];
   topBarItems: TopBarItem[];
   phone?: string;
-  cartCount?: number;
 }
 
 const userActions = [
@@ -40,9 +40,10 @@ function menuItemClass(m: MenuItem, pathname: string, mobile = false): string {
   return `${base} hover:text-naty-rose-deep`.trim();
 }
 
-export function Header({ menu, topBarItems, phone, cartCount = 0 }: HeaderProps) {
+export function Header({ menu, topBarItems, phone }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { itemCount: cartCount } = useCart();
 
   return (
     <header className="bg-white">

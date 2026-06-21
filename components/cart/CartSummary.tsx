@@ -1,27 +1,59 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { formatBRL } from "@/lib/format";
-import type { CartItem } from "@/types";
+import { useCart } from "@/contexts/CartContext";
 
-interface CartSummaryProps {
-  items: CartItem[];
+interface CouponResult {
+  code: string;
+  type: string;
+  value: number;
+  discount: number;
+  label: string;
 }
 
-/**
- * Resumo do pedido com cupom + CEP. Estado local.
- * Cupom "NATY10" → 10% off como exemplo.
- */
-export function CartSummary({ items }: CartSummaryProps) {
-  const [coupon, setCoupon] = useState("NATY10");
-  const [applied, setApplied] = useState(true);
+export function CartSummary() {
+  const { items, subtotal } = useCart();
+
+  const [couponCode, setCouponCode] = useState("");
+  const [coupon, setCoupon] = useState<CouponResult | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
   const [cep, setCep] = useState("");
 
-  const subtotal = useMemo(
-    () => items.reduce((sum, it) => sum + it.price * it.qty, 0),
-    [items]
-  );
-  const discount = applied ? subtotal * 0.1 : 0;
+  async function applyCoupon() {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError("");
+    setCoupon(null);
+
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode, subtotal }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        setCouponError(data.error ?? "Cupom inválido");
+      } else {
+        setCoupon(data.data);
+      }
+    } catch {
+      setCouponError("Erro ao validar cupom");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function removeCoupon() {
+    setCoupon(null);
+    setCouponCode("");
+    setCouponError("");
+  }
+
+  const discount = coupon?.discount ?? 0;
   const total = subtotal - discount;
   const pix = total * 0.9;
   const installmentValue = total / 6;
@@ -32,8 +64,11 @@ export function CartSummary({ items }: CartSummaryProps) {
         Resumo do pedido
       </h2>
 
-      <Row label={`Subtotal (${items.length} ${items.length === 1 ? "item" : "itens"})`} value={formatBRL(subtotal)} />
-      {applied && (
+      <Row
+        label={`Subtotal (${items.length} ${items.length === 1 ? "item" : "itens"})`}
+        value={formatBRL(subtotal)}
+      />
+      {discount > 0 && (
         <Row label="Desconto cupom" value={`− ${formatBRL(discount)}`} accent />
       )}
       <Row label="Frete" value={<span className="text-naty-muted">a calcular</span>} />
@@ -58,28 +93,43 @@ export function CartSummary({ items }: CartSummaryProps) {
 
       {/* Cupom */}
       <Field label="Cupom de desconto">
-        <div className="flex">
-          <input
-            value={coupon}
-            onChange={(e) => setCoupon(e.target.value.toUpperCase())}
-            className={`flex-1 px-3.5 py-3 border bg-white text-[12px] tracking-[0.1em] outline-none ${
-              applied
-                ? "border-naty-gold text-naty-rose-deep font-medium"
-                : "border-naty-line"
-            }`}
-          />
-          <button
-            type="button"
-            onClick={() => setApplied(!applied)}
-            className="bg-naty-gold text-white px-4 text-[11px] tracking-[0.18em] uppercase"
-          >
-            {applied ? "✓" : "OK"}
-          </button>
-        </div>
-        {applied && (
-          <div className="text-[11px] text-naty-gold mt-1.5">
-            ✓ Cupom aplicado · 10% off
+        {coupon ? (
+          <div className="flex items-center justify-between px-3.5 py-3 border border-naty-gold bg-white">
+            <span className="text-[12px] text-naty-rose-deep font-medium tracking-[0.1em]">
+              {coupon.code}
+            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-[11px] text-naty-gold">✓ {coupon.label}</span>
+              <button
+                type="button"
+                onClick={removeCoupon}
+                className="text-[11px] text-naty-muted underline"
+              >
+                remover
+              </button>
+            </div>
           </div>
+        ) : (
+          <div className="flex">
+            <input
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
+              placeholder="CÓDIGO"
+              className="flex-1 px-3.5 py-3 border border-naty-line bg-white text-[12px] tracking-[0.1em] outline-none focus:border-naty-gold"
+            />
+            <button
+              type="button"
+              onClick={applyCoupon}
+              disabled={couponLoading}
+              className="bg-naty-gold text-white px-4 text-[11px] tracking-[0.18em] uppercase disabled:opacity-60"
+            >
+              {couponLoading ? "..." : "OK"}
+            </button>
+          </div>
+        )}
+        {couponError && (
+          <div className="text-[11px] text-red-500 mt-1.5">{couponError}</div>
         )}
       </Field>
 

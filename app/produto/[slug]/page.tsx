@@ -30,7 +30,6 @@ export default async function ProductPage({ params }: PageProps) {
         menu={mainMenu}
         topBarItems={topBarItems}
         phone={whatsapp.display}
-        cartCount={2}
       />
 
       <main className="bg-white">

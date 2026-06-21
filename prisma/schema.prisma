@@ -28,6 +28,11 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum CouponType {
+  PERCENTAGE
+  FIXED
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -45,8 +50,9 @@ model User {
 }
 
 model Address {
-  id         String @id @default(cuid())
+  id         String  @id @default(cuid())
   userId     String
+  isDefault  Boolean @default(false)
   zipcode    String
   street     String
   number     String
@@ -75,16 +81,16 @@ model Category {
 }
 
 model Product {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  slug        String  @unique
+  slug        String   @unique
   description String
   price       Decimal
   salePrice   Decimal?
-  active      Boolean @default(true)
-  featured    Boolean @default(false)
-  isNew       Boolean @default(false)
-  bestSeller  Boolean @default(false)
+  active      Boolean  @default(true)
+  featured    Boolean  @default(false)
+  isNew       Boolean  @default(false)
+  bestSeller  Boolean  @default(false)
 
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
@@ -99,25 +105,29 @@ model Product {
 }
 
 model ProductImage {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   productId String
   url       String
   alt       String?
-  position  Int    @default(0)
+  position  Int     @default(0)
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model ProductVariant {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   productId String
   color     String
   size      String
   sku       String?
-  stock     Int    @default(0)
+  stock     Int     @default(0)
 
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   items   OrderItem[]
+
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
 }
 
 model Order {
@@ -135,9 +145,18 @@ model Order {
   discount      Decimal @default(0)
   total         Decimal
 
-  paymentId     String?
-  shippingCode  String?
-  couponId      String?
+  paymentId    String?
+  shippingCode String?
+  couponId     String?
+
+  // Snapshot do endereço no momento da compra
+  shippingZipcode    String?
+  shippingStreet     String?
+  shippingNumber     String?
+  shippingComplement String?
+  shippingDistrict   String?
+  shippingCity       String?
+  shippingState      String?
 
   user   User?   @relation(fields: [userId], references: [id])
   coupon Coupon? @relation(fields: [couponId], references: [id])
@@ -145,10 +164,13 @@ model Order {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }
 
 model OrderItem {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   orderId   String
   productId String
   variantId String?
@@ -161,12 +183,14 @@ model OrderItem {
 }
 
 model Coupon {
-  id            String   @id @default(cuid())
-  code          String   @unique
-  type          String
+  id            String     @id @default(cuid())
+  code          String     @unique
+  type          CouponType
   value         Decimal
   minOrderValue Decimal?
-  active        Boolean  @default(true)
+  usageLimit    Int?
+  usageCount    Int        @default(0)
+  active        Boolean    @default(true)
   expiresAt     DateTime?
 
   orders Order[]
@@ -176,21 +200,21 @@ model Coupon {
 }
 
 model Banner {
-  id          String  @id @default(cuid())
-  title       String
-  subtitle    String?
-  image       String
-  buttonText  String?
-  buttonLink  String?
-  position    String
-  active      Boolean @default(true)
+  id         String  @id @default(cuid())
+  title      String
+  subtitle   String?
+  image      String
+  buttonText String?
+  buttonLink String?
+  position   String
+  active     Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Review {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   userId    String
   productId String
   rating    Int
@@ -200,4 +224,7 @@ model Review {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([userId])
 }
