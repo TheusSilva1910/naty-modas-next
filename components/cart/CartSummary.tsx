@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { formatBRL } from "@/lib/format";
 import { useCart } from "@/contexts/CartContext";
@@ -150,9 +151,9 @@ export function CartSummary() {
         </div>
       </div>
 
-      <button type="button" className="btn-primary w-full mt-5">
+      <Link href="/checkout" className="btn-primary w-full mt-5 text-center">
         Finalizar compra
-      </button>
+      </Link>
       <button type="button" className="btn-whats w-full mt-2.5">
         <span aria-hidden>⏵</span> Comprar pelo WhatsApp
       </button>

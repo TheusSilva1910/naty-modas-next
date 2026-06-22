@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Header } from "@/components/Header";
@@ -28,6 +29,16 @@ interface PageProps {
 }
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: { categoria: string } }): Promise<Metadata> {
+  const { data: categories } = await getCategories();
+  const category = categories.find((c) => c.id === params.categoria);
+  const name = category?.name ?? "Coleção";
+  return {
+    title: `${name} · Naty Modas`,
+    description: `Explore nossa coleção de ${name.toLowerCase()} com peças exclusivas para o seu estilo.`,
+  };
+}
 
 function getSizeOptions(products: Product[]) {
   return Array.from(new Set(products.flatMap((p) => p.sizes ?? [])));

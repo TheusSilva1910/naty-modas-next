@@ -18,6 +18,7 @@ export async function GET(request: Request) {
     const color     = searchParams.get("color");
     const minPrice  = searchParams.get("minPrice");
     const maxPrice  = searchParams.get("maxPrice");
+    const search    = searchParams.get("search");
     const page      = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
 
     const where: Prisma.ProductWhereInput = { active: true };
@@ -30,6 +31,12 @@ export async function GET(request: Request) {
     }
     if (isNew === "true") {
       where.isNew = true;
+    }
+    if (search) {
+      where.OR = [
+        { name:        { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
     }
     if (size || color) {
       where.variants = {

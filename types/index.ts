@@ -97,6 +97,14 @@ export interface ProductGalleryImage {
   imageUrl?: string;
 }
 
+export interface ProductReviewItem {
+  id: string;
+  author: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
+
 export interface ProductFull extends Product {
   description: string;
   composition?: string;
@@ -111,6 +119,7 @@ export interface ProductFull extends Product {
   availableSizes: ProductSize[];
   related?: Product[];
   relatedIds?: string[];
+  reviewList?: ProductReviewItem[];
 }
 
 export interface SizeRow {

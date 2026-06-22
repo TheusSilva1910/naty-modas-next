@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -10,6 +11,10 @@ import { StateMessage } from "@/components/StateMessage";
 
 import { mainMenu, topBarItems, whatsapp } from "@/data/menu";
 import { getProductBySlug } from "@/lib/api";
+import { auth } from "@/lib/auth";
+import { ProductReviews } from "@/components/product/ProductReviews";
+
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://natymodas.com.br";
 
 interface PageProps {
   params: { slug: string };
@@ -17,8 +22,33 @@ interface PageProps {
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { data: product } = await getProductBySlug(params.slug);
+  if (!product) return { title: "Produto não encontrado · Naty Modas" };
+
+  const title = `${product.name} · Naty Modas`;
+  const description = product.description?.slice(0, 160) ?? `${product.name} — boutique feminina com estilo e elegância.`;
+  const image = product.imageUrl;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${BASE_URL}/produto/${product.slug}`,
+      images: image ? [{ url: image, width: 800, height: 1000, alt: product.name }] : [],
+      type: "website",
+    },
+    twitter: { card: "summary_large_image", title, description, images: image ? [image] : [] },
+  };
+}
+
 export default async function ProductPage({ params }: PageProps) {
-  const { data: product, error } = await getProductBySlug(params.slug);
+  const [{ data: product, error }, session] = await Promise.all([
+    getProductBySlug(params.slug),
+    auth(),
+  ]);
 
   if (!product && !error) {
     notFound();
@@ -69,6 +99,14 @@ export default async function ProductPage({ params }: PageProps) {
             </div>
 
             <ProductTabs product={product} />
+
+            <ProductReviews
+              productId={product.id}
+              rating={product.rating}
+              reviewCount={product.reviewCount}
+              reviews={product.reviewList ?? []}
+              isLoggedIn={!!session?.user}
+            />
 
             {product.related && product.related.length > 0 && (
               <ProductSection

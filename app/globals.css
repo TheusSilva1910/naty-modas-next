@@ -46,6 +46,12 @@
     @apply text-[11px] tracking-[0.36em] text-naty-gold uppercase;
   }
 
+  /* Input padrão */
+  .naty-input {
+    @apply w-full border border-naty-line bg-white px-3.5 py-3 text-[13px]
+           outline-none focus:border-naty-rose-deep transition-colors;
+  }
+
   /* Divisor decorativo "—— MODAS ——" */
   .naty-divider {
     @apply flex items-center justify-center gap-2;

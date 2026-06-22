@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "./Logo";
 import { TopBar } from "./TopBar";
 import { useCart } from "@/contexts/CartContext";
@@ -42,8 +42,16 @@ function menuItemClass(m: MenuItem, pathname: string, mobile = false): string {
 
 export function Header({ menu, topBarItems, phone }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const pathname = usePathname();
+  const router = useRouter();
   const { itemCount: cartCount } = useCart();
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) router.push(`/busca?q=${encodeURIComponent(q)}`);
+  }
 
   return (
     <header className="bg-white">
@@ -54,17 +62,23 @@ export function Header({ menu, topBarItems, phone }: HeaderProps) {
         <div className="max-w-[1440px] mx-auto px-14 py-6">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6">
             {/* Busca */}
-            <div className="relative max-w-[280px]">
+            <form onSubmit={handleSearch} className="relative max-w-[280px]">
               <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar peças, coleções..."
                 className="w-full bg-naty-blush border border-naty-line pl-10 pr-4 py-3
                            text-[12px] tracking-[0.04em] outline-none
                            focus:border-naty-rose-deep transition-colors"
               />
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-naty-gold">
+              <button
+                type="submit"
+                aria-label="Buscar"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-naty-gold"
+              >
                 ⌕
-              </span>
-            </div>
+              </button>
+            </form>
 
             <Link href="/" aria-label="Naty Modas">
               <Logo size="lg" />
@@ -135,7 +149,7 @@ export function Header({ menu, topBarItems, phone }: HeaderProps) {
             <Logo size="sm" />
           </Link>
           <div className="flex gap-4 text-[16px] text-naty-gold">
-            <button aria-label="Buscar">⌕</button>
+            <button aria-label="Buscar" onClick={() => router.push("/busca")}>⌕</button>
             <Link href="/sacola" className="relative" aria-label="Sacola">
               ⛬
               {cartCount > 0 && (
