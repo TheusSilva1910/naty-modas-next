@@ -2,9 +2,9 @@
 
 # 🌸 Naty Modas
 
-### Moda feminina com uma experiência de compra elegante.
+### Moda feminina. Identidade delicada. Experiência digital.
 
-E-commerce com identidade própria, navegação responsiva e uma vitrine feita para destacar cada peça.
+Uma vitrine online que combina elegância, organização e navegação adaptada ao seu dispositivo.
 
 ![Next.js](https://img.shields.io/badge/Next.js-14-3A2E30?style=flat-square&logo=nextdotjs)
 ![React](https://img.shields.io/badge/React-18-149ECA?style=flat-square&logo=react&logoColor=white)
@@ -12,7 +12,7 @@ E-commerce com identidade própria, navegação responsiva e uma vitrine feita p
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?style=flat-square&logo=prisma&logoColor=white)
 
-[Como executar](#como-rodar) · [Estrutura](#estrutura) · [Identidade visual](#sistema-visual) · [Responsividade](#responsividade)
+[O projeto](#sobre-o-projeto) · [Experiência](#experiência) · [Identidade visual](#identidade-visual) · [Desenvolvimento](#desenvolvimento)
 
 </div>
 
@@ -20,154 +20,109 @@ E-commerce com identidade própria, navegação responsiva e uma vitrine feita p
 
 ## Sobre o projeto
 
-E-commerce premium feminino criado a partir do design board original.
-Arquitetura simples, componentes pequenos, dados separados em `data/`,
-identidade visual da marca aplicada via Tailwind config.
+**Naty Modas** é um projeto de e-commerce de moda feminina com uma identidade visual em tons de rosê, dourado e creme. A apresentação valoriza as peças e organiza o conteúdo em seções de categorias, novidades, mais vendidos e inspirações de looks.
 
-## Como rodar
+A proposta é levar a personalidade da marca para o ambiente digital, com uma interface acolhedora e consistente no celular, no tablet e no computador.
 
-```bash
-npm install
-npm run dev
-```
+## Experiência
 
-Acesse `http://localhost:3000`.
+| | Destaque |
+| :--- | :--- |
+| 🛍️ **Vitrine organizada** | Seções de produtos e categorias para apresentar as coleções. |
+| ✨ **Inspiração de looks** | Espaço dedicado a combinações e sugestões visuais. |
+| 📱 **Design responsivo** | Navegação e disposição do conteúdo adaptadas a diferentes telas. |
+| 🌸 **Identidade da marca** | Cores suaves, títulos elegantes e detalhes que conectam as seções. |
 
-## Estrutura
+## Identidade visual
+
+Uma combinação de cores suaves e contrastes pontuais dá personalidade à interface.
+
+<div align="center">
+
+![Rosê](https://img.shields.io/badge/Rosê-D98A99-D98A99?style=for-the-badge)
+![Dourado](https://img.shields.io/badge/Dourado-C9A15A-C9A15A?style=for-the-badge)
+![Blush](https://img.shields.io/badge/Blush-F8EFF1-F8EFF1?style=for-the-badge)
+![Escuro](https://img.shields.io/badge/Escuro-3A2E30-3A2E30?style=for-the-badge)
+
+**Playfair Display** nos títulos · **Montserrat** nos textos
+
+</div>
+
+## Em cada tela
+
+- **Celular:** menu compacto e seções adaptadas à navegação por toque.
+- **Tablet:** distribuição intermediária para aproveitar o espaço disponível.
+- **Computador:** uma vitrine mais ampla, com produtos organizados em grades.
+
+## Desenvolvimento
+
+Os detalhes técnicos ficam abaixo para manter a apresentação principal simples e agradável.
 
 <details>
-<summary><strong>Explorar a organização do projeto</strong></summary>
+<summary><strong>🛠️ Tecnologias utilizadas</strong></summary>
 
+| Tecnologia | Papel no projeto |
+| :--- | :--- |
+| Next.js e React | Estrutura da aplicação e componentes da interface. |
+| TypeScript | Tipagem do código. |
+| Tailwind CSS | Estilização e identidade visual. |
+| Prisma | Camada de acesso a dados. |
+| NextAuth | Autenticação. |
+| Zod | Validação de dados. |
 
-```
+O projeto também inclui dependências do Mercado Pago e Resend. O uso dessas integrações depende da configuração do ambiente.
+
+</details>
+
+<details>
+<summary><strong>📁 Organização do código</strong></summary>
+
+```text
 naty-modas-next/
-├── app/
-│   ├── layout.tsx        # Fontes Playfair + Montserrat (next/font)
-│   ├── page.tsx          # Home — monta todas as seções
-│   └── globals.css       # Tailwind + utilitários da marca (.eyebrow, .btn-primary…)
-│
-├── components/           # Componentes UI reutilizáveis
-│   ├── Header.tsx           ─ Header completo (desktop + mobile drawer)
-│   ├── TopBar.tsx           ─ Barra superior promocional
-│   ├── Logo.tsx             ─ Logotipo "NATY MODAS" em 3 tamanhos
-│   ├── HeroBanner.tsx       ─ Hero split 50/50
-│   ├── CategorySection.tsx  ─ Grid de categorias (carrossel no mobile)
-│   ├── ProductCard.tsx      ─ Card de produto com badge + favoritos
-│   ├── ProductSection.tsx   ─ Wrapper "Mais Vendidos" / "Novidades"
-│   ├── InstitutionalBanner.tsx
-│   ├── LooksSection.tsx     ─ Looks completos
-│   ├── ReviewsSection.tsx   ─ Depoimentos com estrelas
-│   ├── InstagramFeed.tsx
-│   ├── Newsletter.tsx       ─ Captura "Clube Naty" (client component)
-│   ├── Footer.tsx
-│   └── Placeholder.tsx      ─ Imagem temporária rosê/creme/escura
-│
-├── data/                 # Conteúdo separado do JSX
-│   ├── menu.ts           ─ Menu principal + barra superior + WhatsApp
-│   ├── categories.ts
-│   ├── products.ts       ─ Best sellers, novidades + formatBRL
-│   ├── hero.ts
-│   ├── looks.ts
-│   ├── reviews.ts
-│   ├── instagram.ts
-│   └── footer.ts         ─ Seções, pagamentos, redes sociais
-│
-├── types/
-│   └── index.ts          ─ Product, Category, HeroSlide, MenuItem, Look, Review…
-│
-├── tailwind.config.ts    ─ Cores da marca, fontes, padrões de placeholder
-├── postcss.config.mjs
-├── next.config.ts
-├── tsconfig.json
-└── package.json
+├── app/                 Páginas, layouts e estilos globais
+├── components/          Componentes reutilizáveis da interface
+├── data/                Conteúdo e dados de apresentação
+├── types/               Definições de tipos
+├── tailwind.config.ts   Tokens visuais e configuração de estilos
+└── package.json         Dependências e comandos do projeto
 ```
 
 </details>
 
-## Sistema visual
+<details>
+<summary><strong>🚀 Executar localmente</strong></summary>
 
-### Cores (Tailwind tokens)
+Com Node.js e npm instalados, clone o repositório e instale as dependências:
 
-| Token             | Hex     | Uso                                |
-| ----------------- | ------- | ---------------------------------- |
-| `naty-rose`       | #D98A99 | Cor principal — logo, hovers       |
-| `naty-rose-deep`  | #C76D80 | Botões, preços, ações primárias    |
-| `naty-gold`       | #C9A15A | Detalhes, divisórias, eyebrows     |
-| `naty-blush`      | #F8EFF1 | Fundo de seções hero/institucional |
-| `naty-blushSoft`  | #FBF6F7 | Fundos de produtos                 |
-| `naty-text`       | #5A5A5A | Texto principal                    |
-| `naty-dark`       | #3A2E30 | Footer                             |
-| `naty-whats`      | #25D366 | Botão WhatsApp                     |
-
-### Tipografia
-
-- **Títulos** → `font-display` (Playfair Display)
-- **Textos**  → `font-sans` (Montserrat)
-
-Carregadas via `next/font/google` em `app/layout.tsx`, expostas como
-`var(--font-playfair)` e `var(--font-montserrat)`.
-
-### Utilitários customizados
-
-Definidos em `app/globals.css`:
-
-- `.eyebrow` — dourado, tracking widest, uppercase
-- `.btn-primary` — botão sólido rosê escuro
-- `.btn-outline` — botão outline com borda dourada
-- `.btn-whats` — botão WhatsApp verde
-- `.naty-hairline` — linha decorativa dourada com gradient fade
-- `.naty-divider` — divisor com tracinhos laterais
-
-### Placeholders de imagem
-
-O componente `<Placeholder />` mantém o padrão de tracinhos rosê/dourado
-do design board original em 3 variantes (`rose`, `cream`, `dark`).
-Em produção, substituir por `<Image />` do `next/image`.
-
-## Responsividade
-
-Cada componente foi projetado para 3 breakpoints:
-
-- **Mobile** (≤ 767px) — drawer menu, carrosséis horizontais, sticky CTAs
-- **Tablet** (768–1023px) — grids reduzidos (3 cols)
-- **Desktop** (1024px+) — grid completo (6 cols categorias / 4 cols produtos)
-
-A largura máxima do layout é 1440px (`max-w-[1440px]`).
-
-## Adicionando produtos reais
-
-```ts
-// data/products.ts
-{
-  id: "slug-do-produto",
-  name: "Nome da Peça",
-  category: "Vestidos",
-  price: 289.90,
-  oldPrice: 349,
-  installments: { count: 6, value: 48.32 },
-  badge: { type: "new", label: "Novo" }, // "new" | "sale" | "soldout"
-  imageUrl: "/produtos/slug.jpg",
-}
+```bash
+git clone https://github.com/TheusSilva1910/naty-modas-next.git
+cd naty-modas-next
+npm install
 ```
 
-Depois substituir o `<Placeholder />` dentro do `ProductCard.tsx`
-por `<Image src={product.imageUrl} … />`.
+Configure as variáveis necessárias aos serviços que pretende utilizar. Não publique credenciais ou arquivos `.env` no repositório e use um banco separado para desenvolvimento.
 
-## Próximos passos sugeridos
+```bash
+npm run dev
+```
 
-- [ ] Página de categoria (`app/[categoria]/page.tsx`) com filtros laterais
-- [ ] Página de produto (`app/produto/[id]/page.tsx`) com galeria + tabela de medidas
-- [ ] Página de carrinho com cálculo de frete + cupom
-- [ ] Login / Cadastro
-- [ ] Página Sobre com foto da proprietária + história
-- [ ] Integração com CMS (Shopify / Nuvemshop / WooCommerce)
-- [ ] Integração com gateway de pagamento (Pagar.me / Mercado Pago)
-- [ ] Wishlist persistente (localStorage ou conta)
+Abra [localhost:3000](http://localhost:3000).
+
+| Comando | Finalidade |
+| :--- | :--- |
+| `npm run dev` | Iniciar o ambiente de desenvolvimento. |
+| `npm run build` | Gerar o build da aplicação. |
+| `npm start` | Executar o servidor após o build. |
+| `npm run lint` | Verificar o código com o lint configurado. |
+
+</details>
 
 ---
 
 <div align="center">
 
-**Naty Modas** · Elegância nos detalhes, do catálogo à experiência digital.
+### Naty Modas
+
+Elegância nos detalhes — da identidade da marca à experiência digital.
 
 </div>
