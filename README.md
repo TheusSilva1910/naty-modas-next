@@ -1,4 +1,24 @@
-# Naty Modas — Next.js + TypeScript + Tailwind
+<div align="center">
+
+# 🌸 Naty Modas
+
+### Moda feminina com uma experiência de compra elegante.
+
+E-commerce com identidade própria, navegação responsiva e uma vitrine feita para destacar cada peça.
+
+![Next.js](https://img.shields.io/badge/Next.js-14-3A2E30?style=flat-square&logo=nextdotjs)
+![React](https://img.shields.io/badge/React-18-149ECA?style=flat-square&logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?style=flat-square&logo=prisma&logoColor=white)
+
+[Como executar](#como-rodar) · [Estrutura](#estrutura) · [Identidade visual](#sistema-visual) · [Responsividade](#responsividade)
+
+</div>
+
+---
+
+## Sobre o projeto
 
 E-commerce premium feminino criado a partir do design board original.
 Arquitetura simples, componentes pequenos, dados separados em `data/`,
@@ -14,6 +34,10 @@ npm run dev
 Acesse `http://localhost:3000`.
 
 ## Estrutura
+
+<details>
+<summary><strong>Explorar a organização do projeto</strong></summary>
+
 
 ```
 naty-modas-next/
@@ -57,6 +81,8 @@ naty-modas-next/
 ├── tsconfig.json
 └── package.json
 ```
+
+</details>
 
 ## Sistema visual
 
@@ -137,3 +163,11 @@ por `<Image src={product.imageUrl} … />`.
 - [ ] Integração com CMS (Shopify / Nuvemshop / WooCommerce)
 - [ ] Integração com gateway de pagamento (Pagar.me / Mercado Pago)
 - [ ] Wishlist persistente (localStorage ou conta)
+
+---
+
+<div align="center">
+
+**Naty Modas** · Elegância nos detalhes, do catálogo à experiência digital.
+
+</div>
